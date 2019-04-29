@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: postgresql-db-01
+spec:
+  containers:
+  - name: postgres
+    env:
+     - name: POSTGRESQL_DATABASE
+       value: db01
+     - name: POSTGRESQL_USER
+       value: admin
+     - name: POSTGRESQL_PASSWORD
+       value: admin
+    image: centos/postgresql-96-centos7:latest
+    volumeMounts:
+    - name: pg-data-volume
+      mountPath: /var/lib/pgsql/data
+  - name: sidecar
+    env:
+      - name: DATA_SOURCE_NAME
+        value: "postgresql://admin:admin@localhost:5432/db01?sslmode=disable"
+    image: wrouesnel/postgres_exporter
+  volumes:
+  - name: pg-data-volume
+    persistentVolumeClaim:
+      claimName: postgres-data
